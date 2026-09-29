@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Access Gateway | Electronics Store</title>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-deep: #030712;
+            --surface-card: rgba(15, 23, 42, 0.75);
+            --surface-border: rgba(255, 255, 255, 0.08);
+
+            --accent-purple: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.25);
+            --accent-cyan: #06b6d4;
+            --cyan-glow: rgba(6, 182, 212, 0.25);
+
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-deep);
+            color: var(--text-body);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 36px 36px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: 0;
+            pointer-events: none;
+            transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1);
+        }
+        .glow-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(168, 85, 247, 0.14);
+            top: -100px;
+            left: -100px;
+        }
+        .glow-2 {
+            width: 450px;
+            height: 450px;
+            background: rgba(6, 182, 212, 0.14);
+            bottom: -100px;
+            right: -100px;
+        }
+        .glow-cursor {
+            width: 320px;
+            height: 320px;
+            background: rgba(168, 85, 247, 0.08);
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin-top: -160px;
+            margin-left: -160px;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(100px);
+        }
+
+        
+        .portal-container {
+            position: relative;
+            z-index: 1;
+            width: 820px;
+            max-width: 100%;
+            padding: 44px 38px 36px;
+            text-align: center;
+            border-radius: 28px;
+            background: var(--surface-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--surface-border);
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--surface-border);
+            color: var(--accent-cyan);
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        .portal-container h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14.5px;
+            font-weight: 500;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        /* Access Cards Grid */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .portal-card {
+            position: relative;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            text-decoration: none;
+            color: var(--text-heading);
+            border-radius: 20px;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--surface-border);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .admin-card::before {
+            background: linear-gradient(90deg, var(--accent-purple), #6366f1);
+        }
+
+        .customer-card::before {
+            background: linear-gradient(90deg, var(--accent-cyan), #3b82f6);
+        }
+
+        .portal-card:hover {
+            transform: translateY(-6px);
+            background: rgba(30, 41, 59, 0.75);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card:hover {
+            box-shadow: 0 16px 36px rgba(168, 85, 247, 0.18);
+        }
+
+        .customer-card:hover {
+            box-shadow: 0 16px 36px rgba(6, 182, 212, 0.18);
+        }
+
+        /* Card Icon Box */
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-card .card-icon {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: var(--accent-purple);
+        }
+
+        .customer-card .card-icon {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--accent-cyan);
+        }
+
+        .portal-card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .portal-card h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .portal-card p {
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--text-muted);
+        }
+
+        .arrow-icon {
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: all 0.3s ease;
+            color: var(--text-body);
+        }
+
+        .portal-card:hover .arrow-icon {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--surface-border);
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 640px) {
+            .portal-container {
+                padding: 32px 20px 24px;
+            }
+
+            .portal-container h1 {
+                font-size: 26px;
+            }
+
+            .subtitle {
+                font-size: 13.5px;
+                margin-bottom: 28px;
+            }
+
+            .portal-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .portal-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="ambient-glow glow-1" id="glow1"></div>
+<div class="ambient-glow glow-2" id="glow2"></div>
+<div class="ambient-glow glow-cursor" id="glowCursor"></div>
+
+<main class="portal-container">
+    <div class="status-badge">
+        <span>Unified Security Gateway</span>
+    </div>
+
+    <h1>Welcome Portal</h1>
+    <p class="subtitle">Select your authorization role to enter the store management system.</p>
+
+    <div class="portal-grid">
+       
+        <a href="AdminLogin.html" class="portal-card admin-card">
+            <div class="card-icon">
+                <i data-lucide="shield-check" size="26"></i>
+            </div>
+            <h2>
+                <span>Admin Console</span>
+                <i data-lucide="arrow-right" size="18" class="arrow-icon"></i>
+            </h2>
+            <p>Access store administration, inventory catalogs, and operational telemetry.</p>
+        </a>
+
+        <!-- Customer Access Card -->
+        <a href="CustomerLogin.html" class="portal-card customer-card">
+            <div class="card-icon">
+                <i data-lucide="user" size="26"></i>
+            </div>
+            <h2>
+                <span>Customer Portal</span>
+                <i data-lucide="arrow-right" size="18" class="arrow-icon"></i>
+            </h2>
+            <p>Explore products, track personal orders, and manage account services.</p>
+        </a>
+    </div>
+
+    <footer class="footer">
+        <i data-lucide="lock" size="12"></i>
+        <span>Online Electronics Store &copy; 2026</span>
+    </footer>
+</main>
+
+<script>
+    lucide.createIcons();
+
+    
+    document.addEventListener("mousemove", (e) => {
+        const x = e.clientX;
+        const y = e.clientY;
+
+        const glowCursor = document.getElementById("glowCursor");
+        glowCursor.style.transform = `translate(${x}px, ${y}px)`;
+
+        const moveX = (x - window.innerWidth / 2) * 0.02;
+        const moveY = (y - window.innerHeight / 2) * 0.02;
+
+        document.getElementById("glow1").style.transform = `translate(${moveX}px, ${moveY}px)`;
+        document.getElementById("glow2").style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+    });
+</script>
+
+</body>
+</html>
