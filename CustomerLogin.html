@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal | Secure Login</title>
+
+   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+   
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-deep: #030712;
+            --surface-card: rgba(15, 23, 42, 0.75);
+            --surface-border: rgba(255, 255, 255, 0.08);
+
+            --accent-cyan: #06b6d4;
+            --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+            --accent-indigo: #6366f1;
+            --accent-rose: #f43f5e;
+
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-deep);
+            color: var(--text-body);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle Background Grid */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 36px 36px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Ambient Glow Spheres */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: 0;
+            pointer-events: none;
+            transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1);
+        }
+        .glow-1 {
+            width: 480px;
+            height: 480px;
+            background: rgba(6, 182, 212, 0.14);
+            top: -100px;
+            left: -100px;
+        }
+        .glow-2 {
+            width: 450px;
+            height: 450px;
+            background: rgba(99, 102, 241, 0.14);
+            bottom: -100px;
+            right: -100px;
+        }
+        .glow-cursor {
+            width: 320px;
+            height: 320px;
+            background: rgba(6, 182, 212, 0.08);
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin-top: -160px;
+            margin-left: -160px;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(100px);
+        }
+
+        /* Main Card Container */
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 440px;
+            max-width: 100%;
+            background: var(--surface-card);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            padding: 40px 36px 32px;
+            text-align: center;
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header Elements */
+        .icon-header {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            box-shadow: 0 12px 28px var(--accent-cyan-glow);
+        }
+
+        .login-card h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--text-heading);
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 13.5px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        /* Form Group Styles */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.25s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 13px 42px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-heading);
+            outline: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .form-control::placeholder {
+            color: rgba(100, 116, 139, 0.5);
+        }
+
+        .form-control:focus {
+            background: rgba(6, 182, 212, 0.04);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 4px var(--accent-cyan-glow);
+        }
+
+        .form-control:focus ~ .field-icon {
+            color: var(--accent-cyan);
+        }
+
+        .form-control.invalid-input {
+            border-color: var(--accent-rose);
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.15);
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-heading);
+        }
+
+        .error {
+            color: #fca5a5;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 16px;
+        }
+
+        /* Submit Action */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #3b82f6 100%);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 22px var(--accent-cyan-glow);
+            transition: all 0.25s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(6, 182, 212, 0.45);
+            background: linear-gradient(135deg, #22d3ee 0%, #2563eb 100%);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Footer Links */
+        .register-link-wrapper {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--surface-border);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .register-link-wrapper a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s ease;
+        }
+
+        .register-link-wrapper a:hover {
+            text-decoration: underline;
+            color: #67e8f9;
+        }
+
+        .footer {
+            margin-top: 18px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 24px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="grid-bg"></div>
+<div class="ambient-glow glow-1" id="glow1"></div>
+<div class="ambient-glow glow-2" id="glow2"></div>
+<div class="ambient-glow glow-cursor" id="glowCursor"></div>
+
+<main class="login-card">
+    <div class="icon-header">
+        <i data-lucide="user" size="28"></i>
+    </div>
+    
+    <h2>Customer Login</h2>
+    <p class="subtitle">Please enter your credentials to continue securely.</p>
+
+    <form action="login" method="post" id="customerLoginForm" onsubmit="return validateCustomerLogin(event);">
+        <!-- Username Field -->
+        <div class="form-group">
+            <label class="form-label" for="uname">Username</label>
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="uname" 
+                    name="uname" 
+                    class="form-control" 
+                    placeholder="Enter your username" 
+                    autocomplete="username"
+                    oninput="clearError('uname')">
+                <i data-lucide="user" size="18" class="field-icon"></i>
+            </div>
+            <div id="unameError" class="error"></div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+            <label class="form-label" for="pword">Password</label>
+            <div class="input-wrapper">
+                <input 
+                    type="password" 
+                    id="pword" 
+                    name="pword" 
+                    class="form-control" 
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    oninput="clearError('pword')">
+                <i data-lucide="lock" size="18" class="field-icon"></i>
+                <button type="button" class="toggle-btn" onclick="togglePasswordVisibility()" title="Toggle visibility">
+                    <i data-lucide="eye" id="pwdToggleIcon" size="18"></i>
+                </button>
+            </div>
+            <div id="pwordError" class="error"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+            <i data-lucide="log-in" size="18"></i>
+            <span>Authenticate Account</span>
+        </button>
+    </form>
+
+    <div class="register-link-wrapper">
+        Don't have an account? <a href="CustomerRegister.html">New Customer</a>
+    </div>
+
+    <footer class="footer">
+        <i data-lucide="shield" size="12"></i>
+        <span>Customer Portal System &copy; 2026</span>
+    </footer>
+</main>
+
+<script>
+   
+    lucide.createIcons();
+
+   
+    document.addEventListener("mousemove", (e) => {
+        const x = e.clientX;
+        const y = e.clientY;
+
+        const glowCursor = document.getElementById("glowCursor");
+        glowCursor.style.transform = `translate(${x}px, ${y}px)`;
+
+        const moveX = (x - window.innerWidth / 2) * 0.02;
+        const moveY = (y - window.innerHeight / 2) * 0.02;
+
+        document.getElementById("glow1").style.transform = `translate(${moveX}px, ${moveY}px)`;
+        document.getElementById("glow2").style.transform = `translate(${-moveX}px, ${-moveY}px)`;
+    });
+
+    
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById("pword");
+        const toggleIcon = document.getElementById("pwdToggleIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.setAttribute("data-lucide", "eye-off");
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.setAttribute("data-lucide", "eye");
+        }
+        lucide.createIcons();
+    }
+
+    function validateCustomerLogin(event) {
+        const unameInput = document.getElementById("uname");
+        const pwordInput = document.getElementById("pword");
+        const unameVal = unameInput.value.trim();
+        const pwordVal = pwordInput.value.trim();
+
+        let flag = true;
+        if (unameVal === "") {
+            setError(unameInput, "unameError", "Username is required");
+            flag = false;
+        } else if (unameVal.length < 3) {
+            setError(unameInput, "unameError", "Username must be at least 3 characters");
+            flag = false;
+        } else if (!/^[A-Za-z0-9_]+$/.test(unameVal)) {
+            setError(unameInput, "unameError", "Only letters, numbers, and underscores allowed");
+            flag = false;
+        } else {
+            clearError('uname');
+        }
+
+        if (pwordVal === "") {
+            setError(pwordInput, "pwordError", "Password is required");
+            flag = false;
+        } else if (pwordVal.length < 6) {
+            setError(pwordInput, "pwordError", "Password must be at least 6 characters");
+            flag = false;
+        } else {
+            clearError('pword');
+        }
+
+        if (!flag) {
+            event.preventDefault();
+            return false;
+        }
+
+        
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.style.opacity = "0.8";
+        submitBtn.innerHTML = `<i data-lucide="loader" size="18" class="spin"></i> Signing in...`;
+        lucide.createIcons();
+        return true;
+    }
+
+    function setError(input, errorId, message) {
+        input.classList.add("invalid-input");
+        const errorElem = document.getElementById(errorId);
+        errorElem.innerHTML = `<i data-lucide="alert-circle" size="12"></i> ${message}`;
+        lucide.createIcons();
+    }
+
+    function clearError(fieldName) {
+        const input = document.getElementById(fieldName);
+        const errorElem = document.getElementById(fieldName + "Error");
+        if (input) input.classList.remove("invalid-input");
+        if (errorElem) errorElem.innerHTML = "";
+    }
+</script>
+
+</body>
+</html>
